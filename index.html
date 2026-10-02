@@ -395,10 +395,67 @@
   .addmore .glyph{font-size:2rem; color:var(--gold); text-shadow:var(--glow);}
   .addmore p{color:var(--ink-dim); margin:10px 0 0; font-style:italic;}
 
+  /* ---------- GLOSS (tap-to-reveal annotation triggers) ---------- */
+  .gloss{
+    color:var(--frost-bright); cursor:pointer; border-bottom:1px dashed rgba(143,227,255,.5);
+    padding:0 1px; border-radius:2px; transition:.15s; text-decoration:none;
+  }
+  .gloss:hover, .gloss:focus{
+    background:rgba(95,184,214,.14); color:#d6f3ff; outline:none;
+    box-shadow:0 0 0 1px rgba(95,184,214,.4);
+  }
+  .gloss.active{ background:rgba(201,162,75,.2); color:var(--gold); border-bottom-color:var(--gold); }
+  .gloss::after{ content:"\203A"; font-size:.72em; vertical-align:super; opacity:.7; margin-left:1px; }
+
+  /* ---------- ANNOTATION DRAWER ---------- */
+  .backdrop{
+    position:fixed; inset:0; background:rgba(3,5,9,.66); backdrop-filter:blur(2px);
+    opacity:0; pointer-events:none; transition:.25s; z-index:80;
+  }
+  .backdrop.open{ opacity:1; pointer-events:auto; }
+  .drawer{
+    position:fixed; z-index:90; right:22px; bottom:22px; width:min(430px,calc(100vw - 44px));
+    max-height:min(70vh,620px); overflow:auto;
+    background:linear-gradient(180deg,var(--panel2),var(--panel));
+    border:1px solid var(--frost); border-top:3px solid var(--gold);
+    border-radius:6px; box-shadow:0 24px 70px rgba(0,0,0,.65);
+    transform:translateY(28px) scale(.98); opacity:0; pointer-events:none; transition:.25s;
+  }
+  .drawer.open{ transform:none; opacity:1; pointer-events:auto; }
+  .drawer-in{ padding:22px 24px 26px; }
+  .drawer-close{
+    position:absolute; top:10px; right:12px; background:none; border:none; cursor:pointer;
+    color:var(--ink-dim); font-size:1.5rem; line-height:1; font-family:'Cinzel',serif;
+  }
+  .drawer-close:hover{ color:var(--gold); }
+  .drawer-kind{
+    font-family:'Cinzel',serif; font-weight:600; letter-spacing:.16em; text-transform:uppercase;
+    font-size:.64rem; color:var(--frost);
+  }
+  .drawer-term{
+    font-family:'Cinzel',serif; font-weight:600; font-size:1.5rem; color:var(--frost-bright);
+    margin:6px 0 2px; line-height:1.1;
+  }
+  .drawer-lit{
+    font-family:'Spectral',serif; font-style:italic; color:var(--gold);
+    font-size:1.05rem; margin-bottom:12px;
+  }
+  .drawer-note{ font-family:'Spectral',serif; font-size:.98rem; color:var(--ink); line-height:1.65; }
+  .drawer-note p{ margin:0 0 10px; }
+  .drawer-src{ margin-top:14px; border-top:1px solid var(--line); padding-top:12px; }
+  .drawer-src .lbl{
+    font-family:'Cinzel',serif; font-weight:600; letter-spacing:.14em; text-transform:uppercase;
+    font-size:.64rem; color:var(--gold); display:block; margin-bottom:6px;
+  }
+  .drawer-src a{ display:block; color:var(--frost); text-decoration:none; font-size:.9rem; margin:3px 0; border-bottom:1px dotted var(--rune); width:fit-content; }
+  .drawer-src a:hover{ color:var(--frost-bright); border-color:var(--frost); }
+  .drawer-src .prov{ font-size:.78rem; color:var(--ink-dim); font-style:italic; margin-top:8px; }
+
   @media(max-width:720px){
     .block,.block.refrain{grid-template-columns:1fr;}
     .col.orig{border-right:none; border-bottom:1px solid var(--line);}
     h1.title{font-size:2.3rem;}
+    .drawer{ right:0; left:0; bottom:0; width:100%; max-height:78vh; border-radius:12px 12px 0 0; }
   }
 </style>
 </head>
@@ -488,7 +545,7 @@
       <span class="song-rune">ᛟ</span>
       <h2 class="song-title">Alfaðirhaiti</h2>
     </div>
-    <p class="song-meta">"The by-names of the All-Father." A <em>heiti</em> is a poetic alternative name, and this song is a litany of Óðinn's many names and sacred attributes, sealed with an archaic Germanic consecration chant.</p>
+    <p class="song-meta">"The by-names of the All-Father." A <span class="gloss" data-g="heiti" tabindex="0"><em>heiti</em></span> is a poetic alternative name, and this song is a litany of Óðinn's many names and sacred attributes, sealed with an archaic Germanic consecration chant.</p>
 
     <div class="sources">
       <h4>⚜ Sources behind the names</h4>
@@ -505,10 +562,10 @@
     <div class="block">
       <div class="col orig">
         <span class="col-label">Original, treasures &amp; beasts</span>
-        <div class="verse">Draupnir
-Geri, Freki
-Sleipnir
-Gungnir</div>
+        <div class="verse"><span class="gloss" data-g="draupnir" tabindex="0">Draupnir</span>
+<span class="gloss" data-g="gerifreki" tabindex="0">Geri, Freki</span>
+<span class="gloss" data-g="sleipnir" tabindex="0">Sleipnir</span>
+<span class="gloss" data-g="gungnir" tabindex="0">Gungnir</span></div>
       </div>
       <div class="col trans">
         <span class="col-label">Rendered, meaning</span>
@@ -3530,5 +3587,122 @@ Tutu · Šazu · Enbilulu · Sirsir · Gilima
   </footer>
 
 </div>
+
+<!-- ===== ANNOTATION DRAWER ===== -->
+<div class="backdrop" id="backdrop"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTerm">
+  <div class="drawer-in">
+    <button class="drawer-close" id="drawerClose" aria-label="Close annotation">×</button>
+    <div class="drawer-kind" id="drawerKind">Glossa · annotation</div>
+    <div class="drawer-term" id="drawerTerm"></div>
+    <div class="drawer-lit" id="drawerLit"></div>
+    <div class="drawer-note" id="drawerNote"></div>
+    <div class="drawer-src" id="drawerSrc"></div>
+  </div>
+</aside>
+
+<script>
+/* ===== GLOSS data: grounded, sourced annotations keyed by data-g ===== */
+/* Each entry: { term, lit?, note (HTML), sources?:[{label,url}], prov? } */
+const GLOSS = {
+  heiti: {
+    term: "heiti",
+    lit: "Old Norse: a poetic by-name",
+    note: "<p>In skaldic poetics a <em>heiti</em> is a one-word poetic synonym, a stand-in name for a thing or a person. Snorri Sturluson catalogues them in the <em>Skáldskaparmál</em> section of his <em>Prose Edda</em> alongside the longer kenning. A god like Óðinn carries dozens, and reciting them is itself an act of praise.</p>",
+    sources: [
+      {label: "Heiti (poetic naming)", url: "https://en.wikipedia.org/wiki/Heiti"},
+      {label: "Skáldskaparmál", url: "https://en.wikipedia.org/wiki/Sk%C3%A1ldskaparm%C3%A1l"}
+    ]
+  },
+  draupnir: {
+    term: "Draupnir",
+    lit: "\"the dripper\"",
+    note: "<p>Óðinn's gold arm-ring. In Snorri's <em>Skáldskaparmál</em> it drips eight rings of equal weight every ninth night, a self-renewing image of wealth and kingship. It was forged by the dwarves Brokkr and Eitri, and Óðinn later lays it on the pyre of his son Baldr.</p>",
+    sources: [
+      {label: "Draupnir", url: "https://en.wikipedia.org/wiki/Draupnir"}
+    ]
+  },
+  gerifreki: {
+    term: "Geri & Freki",
+    lit: "\"the greedy\" & \"the ravenous\"",
+    note: "<p>Óðinn's two wolves. In <em>Grímnismál</em> (stanza 19) the god gives them all his food and lives on wine alone. Their names are both built on the sense of ravening hunger, a pair of near-synonyms that the poem sets side by side.</p>",
+    sources: [
+      {label: "Geri and Freki", url: "https://en.wikipedia.org/wiki/Geri_and_Freki"}
+    ]
+  },
+  sleipnir: {
+    term: "Sleipnir",
+    lit: "\"the sliding one\"",
+    note: "<p>Óðinn's eight-legged horse, the swiftest of all horses and able to travel to the land of the dead. By Snorri's account he is the offspring of the stallion Svaðilfari and Loki, who had shape-shifted into a mare. He is often read as a shamanic mount carrying the rider between worlds.</p>",
+    sources: [
+      {label: "Sleipnir", url: "https://en.wikipedia.org/wiki/Sleipnir"}
+    ]
+  },
+  gungnir: {
+    term: "Gungnir",
+    lit: "\"the swaying one\"",
+    note: "<p>Óðinn's spear, which never misses its mark. Like Draupnir it is dwarf-work from the sons of Ivaldi. Oaths were sworn on its point, and Óðinn's casting of Gungnir over an enemy host to dedicate them to himself echoes the battle-consecration of this song's own refrain.</p>",
+    sources: [
+      {label: "Gungnir", url: "https://en.wikipedia.org/wiki/Gungnir"}
+    ]
+  }
+};
+
+/* ===== drawer logic ===== */
+(function(){
+  const drawer   = document.getElementById('drawer');
+  const backdrop = document.getElementById('backdrop');
+  const elKind   = document.getElementById('drawerKind');
+  const elTerm   = document.getElementById('drawerTerm');
+  const elLit    = document.getElementById('drawerLit');
+  const elNote   = document.getElementById('drawerNote');
+  const elSrc    = document.getElementById('drawerSrc');
+  let lastTrigger = null;
+
+  function openGloss(key, trigger){
+    const g = GLOSS[key];
+    if(!g) return;
+    document.querySelectorAll('.gloss.active').forEach(e=>e.classList.remove('active'));
+    if(trigger && trigger.classList.contains('gloss')) trigger.classList.add('active');
+    lastTrigger = trigger || null;
+
+    elTerm.textContent = g.term;
+    elLit.textContent  = g.lit || '';
+    elLit.style.display = g.lit ? 'block' : 'none';
+    elNote.innerHTML   = g.note || '';
+
+    let src = '';
+    if((g.sources && g.sources.length) || g.prov){
+      src += '<span class="lbl">⁂ Sources</span>';
+      (g.sources||[]).forEach(s=>{ src += '<a href="'+s.url+'" target="_blank" rel="noopener">'+s.label+'</a>'; });
+      if(g.prov) src += '<p class="prov">'+g.prov+'</p>';
+    }
+    elSrc.innerHTML = src;
+
+    drawer.classList.add('open');
+    backdrop.classList.add('open');
+  }
+  function closeGloss(){
+    drawer.classList.remove('open');
+    backdrop.classList.remove('open');
+    document.querySelectorAll('.gloss.active').forEach(e=>e.classList.remove('active'));
+    if(lastTrigger && lastTrigger.focus) lastTrigger.focus();
+  }
+
+  document.addEventListener('click', e=>{
+    const t = e.target.closest('[data-g]');
+    if(t){ e.preventDefault(); openGloss(t.getAttribute('data-g'), t); }
+  });
+  document.addEventListener('keydown', e=>{
+    if(e.key === 'Escape') closeGloss();
+    if((e.key==='Enter'||e.key===' ') && document.activeElement && document.activeElement.matches('.gloss[data-g]')){
+      e.preventDefault(); openGloss(document.activeElement.getAttribute('data-g'), document.activeElement);
+    }
+  });
+  document.getElementById('drawerClose').addEventListener('click', closeGloss);
+  backdrop.addEventListener('click', closeGloss);
+})();
+</script>
+
 </body>
 </html>
