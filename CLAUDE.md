@@ -1,4 +1,4 @@
-# CLAUDE.md — Codex Galdr project guide
+# CLAUDE.md: Codex Galdr project guide
 
 This file is context for any future Claude session working on the **Codex Galdr**, a
 single-file dark-themed website presenting the lyrics of the band **Heilung** with
@@ -10,6 +10,20 @@ the work stays consistent across sessions.
 
 ---
 
+## 0. Conventions (owner's global rules, recorded here so cloud sessions inherit them)
+
+A cloud session will not see the owner's machine-local global config, so follow these from here:
+- **No em dashes in any prose.** Not in page content, commit messages, docs (this file
+  included), or code comments. Use a comma, colon, period, or parentheses. Hyphens and en
+  dashes (numeric ranges) are fine. The whole site was swept em-dash-free on 2026-10-02;
+  keep it that way, and confirm no em dashes remain in index.html (a count of 0) after any edit.
+- **Commit messages:** Conventional Commits (`feat`, `fix`, `docs`, `style`, `refactor`,
+  `chore`, ...). No attribution footers, and no mention of the AI tooling or its vendor.
+- **This CLAUDE.md is intentionally checked in** for this project (an agreed exception to
+  the global "never commit CLAUDE.md" rule). Do not untrack it.
+
+---
+
 ## 1. What this is
 
 - **Deliverable:** one self-contained HTML file, `index.html` (was `heilung-codex.html`
@@ -18,10 +32,13 @@ the work stays consistent across sessions.
 - **Title:** "Codex Galdr." A dark Nordic-occult presentation of Heilung's lyrics.
 - **Owner intends to publish** at `codex.doyled-it.com` (Cloudflare Pages + Cloudflare
   DNS), non-commercial, no ads.
-- **Status at last edit:** COMPLETE — all three studio albums, 27 songs.
-  - *Ofnir* (2015) — 9/9
-  - *Futha* (2019) — 9/9
-  - *Drif* (2022) — 9/9
+- **Status at last edit:** COMPLETE, all three studio albums, 27 songs.
+  - *Ofnir* (2015): 9/9
+  - *Futha* (2019): 9/9
+  - *Drif* (2022): 9/9
+- **Tap-to-reveal annotations added (2026-10-02):** 136 grounded, sourced glosses across
+  all 27 songs (see §5a). The whole site was also swept em-dash-free and given a prose
+  review pass the same day (see §10).
 - Possible future work: a *Lifa* (live album) section, future releases, or polish.
 
 ---
@@ -34,10 +51,10 @@ most important convention of the project. The owner explicitly values hard resea
 confident recall.
 
 Workflow for each new song:
-1. Read the pasted lyrics. Identify what's actually there — it is often NOT what the
+1. Read the pasted lyrics. Identify what's actually there: it is often NOT what the
    title suggests, and often a *collage* of multiple sources in multiple languages.
 2. Web-search each distinct element separately (e.g. for "Tenet": the Sator Square, AGLA,
-   Gothic numerals, the Old Norse, the Latin invocations — five separate searches).
+   Gothic numerals, the Old Norse, the Latin invocations: five separate searches).
 3. Find the primary source: the manuscript, inscription, edition, or scholarly translation.
    Prefer Wikipedia for orientation, then originals (skaldic.org, sacred-texts, university
    pages, Bandcamp for the band's own notes) for confirmation.
@@ -99,7 +116,9 @@ track count and the nav.
 ```
 - `.block.refrain` = blood-red-tinted ritual/chant blocks, with a `.refrain-tag` label.
 - `.chant` vs `.verse` inside a col: `.chant` for incantatory/list text, `.verse` for prose.
-- Footnotes use `<sup><a href="#xx1">1</a></sup>` → `<strong>¹</strong>` in `.notes`.
+- Footnotes use `<sup><a href="#xx1">1</a></sup>` to `<strong>¹</strong>` in `.notes`.
+- Any term can be wrapped `<span class="gloss" data-g="KEY" tabindex="0">…</span>` to make
+  it tappable; add the matching `KEY` to the `GLOSS` object (see §5a).
 
 ---
 
@@ -111,11 +130,13 @@ Dark Nordic-occult base. Key `:root` vars:
 - Fonts: Cinzel (headers/runes), EB Garamond / Spectral (body/verse)
 - Rune + grain texture overlays; `body{overflow-x:hidden}` (guards themed-section bleed)
 
-Link convention (IMPORTANT — applies everywhere, including footnotes):
+Link convention (IMPORTANT, applies everywhere, including footnotes):
 `color:var(--frost); text-decoration:none; border-bottom:1px dotted var(--rune);`
 with `:hover` brightening. There are dedicated rules for `.sources a`, `.song-meta a`,
-AND `.notes a` — if you add a new link context, give it this same style so links don't
-fall back to default browser blue.
+AND `.notes a`. If you add a new link context, give it this same style so links don't
+fall back to default browser blue. The `.gloss` trigger is the deliberate exception: a
+frost dashed underline plus a `›` marker, going gold when active (it opens a drawer, it is
+not a link).
 
 ---
 
@@ -123,19 +144,19 @@ fall back to default browser blue.
 
 *Ofnir* and *Futha* stay in the native frost-and-gold (they're Norse/Germanic). Theming
 is RESERVED for *Drif*, which Heilung deliberately built to reach beyond the North to
-"all great ancient civilizations." This restraint is intentional and meaningful — don't
+"all great ancient civilizations." This restraint is intentional and meaningful, so don't
 theme the Norse-family songs just for consistency. (Asja, Anoana, Nesso, Buslas Bann are
 Norse/Germanic and correctly stay default-blue.)
 
 Two layers, both via CSS custom props
 (`--c-accent / --c-bright / --c-wash / --c-wash-soft / --c-tint / --c-edge / --c-glow`):
 
-### Layer 1 — per-BLOCK tint
+### Layer 1: per-BLOCK tint
 Add `culture-X` to a `.block` to tint just that block (left edge, label color, refrain
 wash), plus a `<span class="culture-sigil">⟨glyph⟩</span>` before the label text.
 Use for MULTI-culture songs where blocks come from different civilizations (e.g. Tenet).
 
-### Layer 2 — whole-SECTION theme
+### Layer 2: whole-SECTION theme
 Add `theme-X` to the `<section class="song">` to wash the ENTIRE entry: title glow, rune,
 head rule, sources panel, a faint background tint (negative margins -22px aligned to the
 .wrap's 22px padding), and it sets the `--c-*` vars so child blocks inherit the color.
@@ -145,7 +166,7 @@ Use for SINGLE-culture Drif songs (Urbani, Keltentrauer, Nikkal, Marduk).
 `nav-rome / nav-gaelic / nav-babylon / nav-ugarit` color the index links. For a genuinely
 MULTI-culture song, use `nav-blend`: gradient border + gradient text. The link must wrap
 its text in `<span class="blend-text">`. NOTE: nav-blend's inner fill is SOLID `#0c1421`
-(padding-box) so only the border shows the gradient — an earlier translucent fill made it
+(padding-box) so only the border shows the gradient. An earlier translucent fill made it
 look "light-themed," which was a bug; keep it solid.
 
 ### The palette (accent / sigil / used for)
@@ -161,10 +182,46 @@ look "light-themed," which was a bug; keep it solid.
 
 Tenet is deliberately a block-by-block MOSAIC (no section theme) because no single
 culture dominates it. Single-culture songs get the full section wash. This distinction
-is a design decision — keep it.
+is a design decision; keep it.
 
 A `.culture-key` legend (color-swatch chips) goes under the meta of themed/mosaic songs
 so readers can decode the colors.
+
+---
+
+## 5a. The annotation system (tap-to-reveal glosses, added 2026-10-02)
+
+Ported from the sister project (fenian / An Chartlann) and restyled to the codex's
+frost-and-gold palette. It lets any term in the lyrics or commentary open a drawer with a
+grounded, sourced gloss, so depth that would clutter the page stays one tap away.
+
+- **Trigger:** wrap a term `<span class="gloss" data-g="KEY" tabindex="0">text</span>`.
+  The key is lowercase, namespaced by song id (`krigsgaldr_eggja`, `marduk_enuma`, ...),
+  letters/digits/underscores only.
+- **Data:** one `const GLOSS = { ... }` object in a `<script>` near the end of `index.html`
+  (not a separate file). Each entry:
+  ```js
+  KEY: {
+    term: "headword",
+    lit:  "short literal gloss",          // italic; omit if none
+    note: "<p>grounded explanation (HTML)</p>",
+    sources: [{label:"…", url:"…"}],       // links in the drawer
+    prov: "confidence / provenance caveat" // shown only when a claim needs qualifying
+  }
+  ```
+- **Drawer + handler:** the `<aside class="drawer">` markup and the event-delegated click /
+  keyboard (Enter/Space/Esc, backdrop, focus return) handler are inline in the same
+  `<script>`. Accessible; keep it so.
+- **Golden rule still applies:** only verified facts go in `GLOSS`. Every genuinely
+  contested reading (the Eggja stone, *alu*, Arepo, AGLA's dating, the Högstena amulet,
+  Sigrdrífa/Brynhildr, Nikkal's domain) carries a `prov` caveat rather than false certainty.
+- **Validate after any gloss edit:** every `data-g` must resolve to a `GLOSS` key and vice
+  versa, and the script must parse:
+  ```
+  grep -oE 'data-g="[a-z0-9_]+"' index.html | sort -u    # vs the GLOSS keys
+  node --check <(sed -n '/const GLOSS = {/,/^};/p' index.html)   # JS syntax
+  ```
+  All 128 citation URLs in the glosses were HTTP-checked (2026-10-02) and resolve.
 
 ---
 
@@ -215,12 +272,11 @@ full Norwegian Rune Poem (Younger Futhark, Dickins 1915) + Bezenye brooch refrai
 "runo raginakundo." Othan = Hávamál Ljóðatal charms. Traust = First Merseburg Charm +
 Grógaldr. Vapnatak = modern West-Central German dialect (Hunsrückisch) prayer; title = ON
 "weapon-taking." Svanrand = valkyrie name-þula (was initially MISLABELED "Krigsgaldr" early
-in the project — corrected: real Krigsgaldr is in Ofnir). Elivagar = original German
+in the project, corrected: real Krigsgaldr is in Ofnir). Elivagar = original German
 glacial poem + Eddic list of 11 Élivágar ice-rivers (Gylfaginning 4 / Grímnismál 27–28).
 Elddansurin = 8 ON fire-heiti (Nafnaþulur-style); forms an ice/fire diptych with Elivagar.
 Hamrer Hippyer = Second Merseburg Charm (Hopkins 2019, mimisbrunnr.info) + Odin-names
-(Hangatýr+hamingja, Gangleri) + Eggja "Au is urki." Album closes on a healing charm —
-fitting, "Heilung" = healing.
+(Hangatýr+hamingja, Gangleri) + Eggja "Au is urki." Album closes on a healing charm. Fitting, since "Heilung" = healing.
 
 **Drif (cross-civilization):**
 - Asja (1) = ON fragment-collage (frost-blue, default).
@@ -272,3 +328,29 @@ DNS is on Cloudflare; owner is comfortable with setup.
 3. Pages project → Custom domains → add `codex.doyled-it.com` (DNS auto-wires; HTTPS auto).
 4. To update later: re-upload a new `index.html` as a new deployment.
 Optional pre-publish: set `<title>`, add `noindex` meta, add footer disclaimer.
+
+---
+
+## 10. The 2026-10-02 pass (gloss system, em-dash sweep, prose review)
+
+A single multi-part pass after the 27 songs were complete, all on `index.html`:
+1. **Em-dash sweep.** Every em dash (510) was replaced, commas for appositives,
+   a colon in the title, period where clauses were parallel. Numeric en-dashes kept.
+   The no-em-dash rule (see §0) now holds everywhere, content and docs.
+2. **Gloss drawer ported** from fenian and restyled to the frost/gold palette (see §5a).
+3. **136 glosses authored** across all 27 songs (Ofnir 41, Futha 46, Drif 44, plus a
+   5-term demo on Alfaðirhaiti), batched by album, each research-grounded and sourced,
+   contested readings flagged with `prov`. Drafted by per-album research subagents; keys
+   applied and validated centrally.
+4. **Prose review pass** (per-album review subagents). Fixed 31 issues: comma splices the
+   em-dash sweep left behind, a few banned AI-tell words (tapestry/woven, resonance), and
+   three over-confident claims aligned with the page's own caveats (the Negau helmet's
+   "oldest Germanic text", the Cernunnos/carnyx root, Nikkal as a goddess of orchards and
+   wife of the moon god, not a moon-goddess). Also an internal date fix on Nikkal.
+5. **Citation URLs link-checked:** all 128 resolve (two Suetonius Wikisource paths were
+   corrected from `/Life_of_*` to the live `/Augustus` and `/Julius_Caesar`).
+
+Note: the owner's `reviewing-nonfiction` and `writing-human-prose` skills did not load
+inside subagents in that session ("Unknown skill"); the reviewers applied the criteria
+directly instead. If a future session wants the packaged skills exercised in-process,
+check why they are not resolving for subagents.
